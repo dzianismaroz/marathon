@@ -48,7 +48,7 @@ func (s *Stack[T]) Pop() (T, bool) {
 
 func (s *Stack[T]) Len() int {
 	s.mu.Lock()
-	s.mu.Unlock()
+	defer s.mu.Unlock()
 	var (
 		count int
 		n     = s.first
