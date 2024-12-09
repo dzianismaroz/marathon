@@ -10,12 +10,12 @@ import (
 func TestStack(t *testing.T) {
 	tests := []struct {
 		name           string
-		operations     func(*stack.Stack[int]) interface{}
-		expectedResult interface{}
+		operations     func(*stack.Stack[int]) any
+		expectedResult any
 	}{
 		{
 			name: "Push one element and check length",
-			operations: func(s *stack.Stack[int]) interface{} {
+			operations: func(s *stack.Stack[int]) any {
 				s.Push(1)
 				return s.Len()
 			},
@@ -23,7 +23,7 @@ func TestStack(t *testing.T) {
 		},
 		{
 			name: "Push and pop one element",
-			operations: func(s *stack.Stack[int]) interface{} {
+			operations: func(s *stack.Stack[int]) any {
 				s.Push(42)
 				elem, ok := s.Pop()
 				return struct {
@@ -38,7 +38,7 @@ func TestStack(t *testing.T) {
 		},
 		{
 			name: "Pop from empty stack",
-			operations: func(s *stack.Stack[int]) interface{} {
+			operations: func(s *stack.Stack[int]) any {
 				elem, ok := s.Pop()
 				return struct {
 					Element int
@@ -52,7 +52,7 @@ func TestStack(t *testing.T) {
 		},
 		{
 			name: "Push multiple elements and check order",
-			operations: func(s *stack.Stack[int]) interface{} {
+			operations: func(s *stack.Stack[int]) any {
 				s.Push(1)
 				s.Push(2)
 				s.Push(3)
@@ -70,14 +70,14 @@ func TestStack(t *testing.T) {
 		},
 		{
 			name: "Check length on empty stack",
-			operations: func(s *stack.Stack[int]) interface{} {
+			operations: func(s *stack.Stack[int]) any {
 				return s.Len()
 			},
 			expectedResult: 0,
 		},
 		{
 			name: "Push and pop multiple elements interleaved",
-			operations: func(s *stack.Stack[int]) interface{} {
+			operations: func(s *stack.Stack[int]) any {
 				s.Push(10)
 				s.Push(20)
 				_, _ = s.Pop()
