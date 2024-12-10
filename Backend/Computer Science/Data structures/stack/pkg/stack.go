@@ -57,5 +57,6 @@ func (s *Stack[T]) Pop() (T, bool) {
 func (s *Stack[T]) Len() uint {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
+
 	return s.length
 }

@@ -9,8 +9,9 @@ type (
 	}
 
 	Queue[T any] struct {
-		mu   sync.Mutex
-		last *el[T]
+		mu     sync.RWMutex
+		last   *el[T]
+		length uint // Queue is able to track it's own length
 	}
 )
 
@@ -18,6 +19,7 @@ func New[T any]() *Queue[T] {
 	return &Queue[T]{}
 }
 
+// Asymptomatic: O(1)
 func (q *Queue[T]) Push(val T) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
@@ -28,10 +30,12 @@ func (q *Queue[T]) Push(val T) {
 	}
 
 	q.last = &el[T]{val: val, next: q.last}
+	q.length++
 
 	return
 }
 
+// Asymptomatic: O(1)
 func (q *Queue[T]) Pop() (T, bool) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
@@ -43,10 +47,12 @@ func (q *Queue[T]) Pop() (T, bool) {
 
 	val := q.last.val
 	q.last = q.last.next
+	q.length--
 
 	return val, true
 }
 
+// Asymptomatic: O(1)
 func (q *Queue[T]) Peek() (T, bool) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
@@ -59,19 +65,10 @@ func (q *Queue[T]) Peek() (T, bool) {
 	return q.last.val, true
 }
 
+// Asymptomatic: O(1)
 func (q *Queue[T]) Len() int {
-	q.mu.Lock()
-	defer q.mu.Unlock()
+	q.mu.RLock()
+	defer q.mu.RUnlock()
 
-	var (
-		count int
-		p     = q.last
-	)
-
-	for p != nil {
-		count += 1
-		p = p.next
-	}
-
-	return count
+	return int(q.length)
 }
