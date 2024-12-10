@@ -10,6 +10,7 @@ type (
 
 	Queue[T any] struct {
 		mu     sync.RWMutex
+		first  *el[T]
 		last   *el[T]
 		length uint // Queue is able to track it's own length
 	}
@@ -24,15 +25,17 @@ func (q *Queue[T]) Push(val T) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 
-	if q.last == nil {
-		q.last = &el[T]{val: val}
-		return
+	newEl := &el[T]{val: val}
+
+	if q.last != nil {
+		q.last.next = newEl
+	} else {
+		// If the queue is empty, first and last point to the new element
+		q.first = newEl
 	}
 
-	q.last = &el[T]{val: val, next: q.last}
+	q.last = newEl
 	q.length++
-
-	return
 }
 
 // Asymptomatic: O(1)
@@ -40,13 +43,17 @@ func (q *Queue[T]) Pop() (T, bool) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 
-	if q.last == nil {
+	if q.first == nil {
 		var zero T
 		return zero, false
 	}
 
-	val := q.last.val
-	q.last = q.last.next
+	val := q.first.val
+	q.first = q.first.next
+	if q.first == nil {
+		// If the queue is now empty, reset the last pointer
+		q.last = nil
+	}
 	q.length--
 
 	return val, true
@@ -57,18 +64,18 @@ func (q *Queue[T]) Peek() (T, bool) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 
-	if q.last == nil {
+	if q.first == nil {
 		var zero T
 		return zero, false
 	}
 
-	return q.last.val, true
+	return q.first.val, true
 }
 
 // Asymptomatic: O(1)
-func (q *Queue[T]) Len() int {
+func (q *Queue[T]) Len() uint {
 	q.mu.RLock()
 	defer q.mu.RUnlock()
 
-	return int(q.length)
+	return q.length
 }
