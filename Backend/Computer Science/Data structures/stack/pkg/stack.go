@@ -23,6 +23,7 @@ func NewStack[T any]() *Stack[T] {
 	return &Stack[T]{}
 }
 
+// Push: Adding an element to the top of the stack.
 // Asymptomatic : O(1)
 func (s *Stack[T]) Push(val T) {
 	s.mu.Lock()
@@ -32,6 +33,7 @@ func (s *Stack[T]) Push(val T) {
 	s.length++
 }
 
+// Pop: Removing an element from the top of the stack.
 // Asymptomatic : O(1)
 func (s *Stack[T]) Pop() (T, bool) {
 	s.mu.Lock()
@@ -49,10 +51,35 @@ func (s *Stack[T]) Pop() (T, bool) {
 	return result, true
 }
 
+// Peek Looking at the top element of the stack without removing it.
+// Asymptomatic : O(1)
+func (s *Stack[T]) Peek() (T, bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	var result T
+
+	if s.first == nil {
+		return result, false
+	}
+
+	return s.first.value, true
+}
+
+//Size: Getting the number of elements in the stack.
 //Asymptomatic: O(1)
-func (s *Stack[T]) Len() uint {
+func (s *Stack[T]) Size() uint {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
 	return s.length
+}
+
+//Size: Getting the number of elements in the stack.
+//Asymptomatic: O(1)
+func (s *Stack[T]) IsEmpty() bool {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	return s.length == 0
 }

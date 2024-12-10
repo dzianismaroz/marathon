@@ -17,7 +17,7 @@ func TestStack(t *testing.T) {
 			name: "Push one element and check length",
 			operations: func(s *stack.Stack[int]) any {
 				s.Push(1)
-				return s.Len()
+				return s.Size()
 			},
 			expectedResult: uint(1),
 		},
@@ -71,7 +71,7 @@ func TestStack(t *testing.T) {
 		{
 			name: "Check length on empty stack",
 			operations: func(s *stack.Stack[int]) any {
-				return s.Len()
+				return s.Size()
 			},
 			expectedResult: uint(0),
 		},
