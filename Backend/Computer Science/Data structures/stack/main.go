@@ -26,4 +26,12 @@ func main() {
 	fmt.Println(stk.Pop())
 
 	fmt.Println("stack len:", stk.Size())
+
+	stk.Push(10)
+	stk.Push(9)
+	stk.Push(8)
+	fmt.Println(stk.Size())
+
+	fmt.Println(stk.PopAll())
+	fmt.Print(stk.Size())
 }

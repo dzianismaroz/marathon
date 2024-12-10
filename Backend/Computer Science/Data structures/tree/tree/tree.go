@@ -3,12 +3,13 @@ package tree
 type (
 	node[T comparable] struct {
 		val   T
-		left  *node[T]
-		right *node[T]
+		left  *node[T] // less than val
+		right *node[T] // greater than val.
 	}
 
 	Tree[T comparable] struct {
-		root *node[T]
+		root     *node[T] // root tree node.
+		nodesCol uint     // total count of nodes.
 	}
 )
 

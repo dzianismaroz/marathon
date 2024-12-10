@@ -49,11 +49,13 @@ func (q *Queue[T]) Pop() (T, bool) {
 	}
 
 	val := q.first.val
+
 	q.first = q.first.next
 	if q.first == nil {
 		// If the queue is now empty, reset the last pointer
 		q.last = nil
 	}
+
 	q.length--
 
 	return val, true
@@ -73,9 +75,13 @@ func (q *Queue[T]) Peek() (T, bool) {
 }
 
 // Asymptomatic: O(1)
-func (q *Queue[T]) Len() uint {
+func (q *Queue[T]) Size() uint {
 	q.mu.RLock()
 	defer q.mu.RUnlock()
 
 	return q.length
+}
+
+func (q *Queue[T]) IsEmpty() bool {
+	return q.Size() == 0
 }

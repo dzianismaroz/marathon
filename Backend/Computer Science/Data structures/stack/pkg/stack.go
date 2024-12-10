@@ -66,7 +66,7 @@ func (s *Stack[T]) Peek() (T, bool) {
 	return s.first.value, true
 }
 
-//Size: Getting the number of elements in the stack.
+// Size: Getting the number of elements in the stack.
 //Asymptomatic: O(1)
 func (s *Stack[T]) Size() uint {
 	s.mu.RLock()
@@ -75,8 +75,43 @@ func (s *Stack[T]) Size() uint {
 	return s.length
 }
 
-//Size: Getting the number of elements in the stack.
+// Size: Getting the number of elements in the stack.
 //Asymptomatic: O(1)
 func (s *Stack[T]) IsEmpty() bool {
 	return s.Size() == 0
+}
+
+// Clear is method to truncate all elements in Stack.
+// Asymptomatic: O(1)
+func (s *Stack[T]) Clear() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	s.first = nil
+	s.length = 0
+}
+
+// PopAll pops all elements and returns as slice.
+// Asymptomatic: O(n)
+// /
+func (s *Stack[T]) PopAll() []T {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	var (
+		result = make([]T, s.length)
+		iter   = s.first
+		idx    = 0
+	)
+
+	for iter != nil {
+		result[idx] = iter.value
+		iter = iter.next
+		idx++
+	}
+
+	s.first = nil
+	s.length = 0
+
+	return result
 }
