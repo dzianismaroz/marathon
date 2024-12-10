@@ -78,8 +78,5 @@ func (s *Stack[T]) Size() uint {
 //Size: Getting the number of elements in the stack.
 //Asymptomatic: O(1)
 func (s *Stack[T]) IsEmpty() bool {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-
-	return s.length == 0
+	return s.Size() == 0
 }
