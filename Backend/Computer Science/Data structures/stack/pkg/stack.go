@@ -10,8 +10,9 @@ type (
 
 	// LIFO implementation.
 	Stack[T any] struct {
-		mu    sync.Mutex
-		first *el[T]
+		mu     sync.RWMutex
+		first  *el[T]
+		length uint // optimal way for Stack to track its length.
 	}
 )
 
@@ -20,16 +21,20 @@ func NewStack[T any]() *Stack[T] {
 	return &Stack[T]{}
 }
 
+// Asymptomatic : O(1)
 func (s *Stack[T]) Push(elem T) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	s.first = &el[T]{
+	s.first = &el[T]{ // O(1)
 		val:  elem,
 		next: s.first,
 	}
+
+	s.length++
 }
 
+// Asymptomatic : O(1)
 func (s *Stack[T]) Pop() (T, bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -43,20 +48,14 @@ func (s *Stack[T]) Pop() (T, bool) {
 	result = s.first.val
 	s.first = s.first.next
 
+	s.length--
+
 	return result, true
 }
 
-func (s *Stack[T]) Len() int {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	var (
-		count int
-		n     = s.first
-	)
-	for n != nil {
-		count += 1
-		n = n.next
-	}
-
-	return count
+//Asymptomatic: O(1)
+func (s *Stack[T]) Len() uint {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.length
 }

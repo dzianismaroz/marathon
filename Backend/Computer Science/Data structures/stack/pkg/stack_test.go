@@ -19,7 +19,7 @@ func TestStack(t *testing.T) {
 				s.Push(1)
 				return s.Len()
 			},
-			expectedResult: 1,
+			expectedResult: uint(1),
 		},
 		{
 			name: "Push and pop one element",
@@ -73,7 +73,7 @@ func TestStack(t *testing.T) {
 			operations: func(s *stack.Stack[int]) any {
 				return s.Len()
 			},
-			expectedResult: 0,
+			expectedResult: uint(0),
 		},
 		{
 			name: "Push and pop multiple elements interleaved",
