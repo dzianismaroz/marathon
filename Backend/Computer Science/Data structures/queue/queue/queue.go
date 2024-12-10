@@ -85,3 +85,14 @@ func (q *Queue[T]) Size() uint {
 func (q *Queue[T]) IsEmpty() bool {
 	return q.Size() == 0
 }
+
+// Clear is method to truncate all elements in Queue.
+// Asymptomatic: O(1)
+func (q *Queue[T]) Clear() {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+
+	q.first = nil
+	q.last = nil
+	q.length = 0
+}

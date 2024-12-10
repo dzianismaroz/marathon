@@ -93,7 +93,6 @@ func (s *Stack[T]) Clear() {
 
 // PopAll pops all elements and returns as slice.
 // Asymptomatic: O(n)
-// /
 func (s *Stack[T]) PopAll() []T {
 	s.mu.Lock()
 	defer s.mu.Unlock()
