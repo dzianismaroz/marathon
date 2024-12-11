@@ -87,6 +87,50 @@ func TestStack(t *testing.T) {
 			},
 			expectedResult: 30, // The last pushed element
 		},
+
+		{
+			name: "Push and popAll elements",
+			operations: func(s *stack.Stack[int]) any {
+				s.Push(10)
+				s.Push(20)
+				s.Push(30)
+				s.Push(40)
+				res := s.PopAll()
+				return res
+			},
+			expectedResult: []int{40, 30, 20, 10},
+		},
+
+		{
+			name: "Push and Clear Stack",
+			operations: func(s *stack.Stack[int]) any {
+				s.Push(10)
+				s.Push(20)
+				s.Push(30)
+				s.Push(40)
+				s.Clear()
+				return s.IsEmpty()
+			},
+			expectedResult: true, // stack must be empty after cleanup.
+		},
+
+		{
+			name: "Push and Peek",
+			operations: func(s *stack.Stack[int]) any {
+				s.Push(1999)
+				s.Push(1843)
+				s.Push(2024)
+				res, _ := s.Peek()
+				return struct {
+					Element int
+					Size    uint
+				}{res, s.Size()}
+			},
+			expectedResult: struct {
+				Element int
+				Size    uint
+			}{2024, 3}, // stack must have full size as after Push.
+		},
 	}
 
 	for _, tt := range tests {
