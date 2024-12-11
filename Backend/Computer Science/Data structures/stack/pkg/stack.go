@@ -13,7 +13,7 @@ type (
 	// LIFO implementation.
 	Stack[T any] struct {
 		mu     sync.RWMutex
-		head   *element[T] // head of Stask.
+		head   *element[T] // head of Stask to hold the latest element.
 		length uint        // optimal way for Stack to track its length.
 	}
 )
