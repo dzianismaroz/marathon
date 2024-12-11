@@ -8,6 +8,8 @@ import (
 )
 
 func TestStack(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name           string
 		operations     func(*stack.Stack[int]) any
@@ -153,6 +155,8 @@ func TestStack(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			stack := stack.New[int]()
 			result := tt.operations(stack)
 

@@ -18,13 +18,34 @@ type (
 	}
 )
 
+var genericPools = sync.Map{} // Map to store pools by type.
+
+// typedPool provides a type-safe wrapper for sync.Pool to manage generic Stack instances.
+func typedPool[T any]() *sync.Pool {
+	pool, _ := genericPools.LoadOrStore(new(T), &sync.Pool{
+		New: func() any { return New[T]() },
+	})
+	return pool.(*sync.Pool)
+}
+
 // Creates new Stack instance.
 func New[T any]() *Stack[T] {
 	return &Stack[T]{}
 }
 
+// Single provides a singleton Stack instance.
+func Single[T any]() *Stack[T] {
+	return typedPool[T]().Get().(*Stack[T])
+}
+
+// Release resets and returns the stack instance back to the pool.
+func (s *Stack[T]) Release() {
+	s.Clear() // Reset the stack before putting it back.
+	typedPool[T]().Put(s)
+}
+
 // Push: Adding an element to the top of the stack.
-// Asymptotic : O(1)
+// Asymptotic : O(1).
 func (s *Stack[T]) Push(val T) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -34,7 +55,7 @@ func (s *Stack[T]) Push(val T) {
 }
 
 // Pop: Removing an element from the top of the stack.
-// Asymptotic : O(1)
+// Asymptotic : O(1).
 func (s *Stack[T]) Pop() (T, bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -52,10 +73,10 @@ func (s *Stack[T]) Pop() (T, bool) {
 }
 
 // Peek Looking at the top element of the stack without removing it.
-// Asymptotic : O(1)
+// Asymptotic : O(1).
 func (s *Stack[T]) Peek() (T, bool) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 
 	var result T
 
@@ -67,21 +88,15 @@ func (s *Stack[T]) Peek() (T, bool) {
 }
 
 // Size: Getting the number of elements in the stack.
-//Asymptotic: O(1)
+// Asymptotic: O(1).
 func (s *Stack[T]) Size() uint {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-
 	return s.length
 }
 
-// Size: Getting the number of elements in the stack.
-//Asymptotic: O(1)
+// Size: resolves stack emptiness.
+// Asymptotic: O(1).
 func (s *Stack[T]) IsEmpty() bool {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-
-	return s.Size() == 0
+	return s.length == 0
 }
 
 // Clear is method to truncate all elements in Stack.
@@ -95,19 +110,25 @@ func (s *Stack[T]) Clear() {
 }
 
 // PopAll pops all elements and returns as slice.
-// Asymptotic: O(n)
+// Asymptotic: O(n).
 func (s *Stack[T]) PopAll() []T {
-	s.mu.Lock()
-	defer s.mu.Unlock()
 
-	result := make([]T, 0, s.length)
+	idx := 0
 
-	for s.head != nil {
-		result = append(result, s.head.value)
-		s.head = s.head.next
+	s.mu.Lock() // --- critical section starts here ---.
+
+	result := make([]T, s.length)
+	head := s.head
+
+	for head != nil {
+		result[idx] = head.value
+		head = head.next
+		idx++
 	}
 
 	s.length = 0
+
+	s.mu.Unlock() // -- critical section release ---.
 
 	return result
 }

@@ -33,5 +33,19 @@ func main() {
 	fmt.Println(stk.Size())
 
 	fmt.Println(stk.PopAll())
-	fmt.Print(stk.Size())
+	fmt.Println(stk.Size())
+
+	// Fetch a singleton stack instance.
+	stack := stack.Single[int]()
+
+	// Use the stack.
+	stack.Push(10)
+	stack.Push(20)
+
+	val, _ := stack.Pop()
+	fmt.Println(val)
+
+	// Release the stack back to the pool.
+	stack.Release()
+
 }
