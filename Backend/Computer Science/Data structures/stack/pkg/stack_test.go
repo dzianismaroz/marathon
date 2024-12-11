@@ -131,6 +131,24 @@ func TestStack(t *testing.T) {
 				Size    uint
 			}{2024, 3}, // stack must have full size as after Push.
 		},
+
+		{
+			name: "Push on large ammount of data",
+			operations: func(s *stack.Stack[int]) any {
+				for i := range 100_000 {
+					s.Push(i)
+				}
+				res, _ := s.Peek()
+				return struct {
+					Element int
+					Size    uint
+				}{res, s.Size()}
+			},
+			expectedResult: struct {
+				Element int
+				Size    uint
+			}{99_999, 100_000},
+		},
 	}
 
 	for _, tt := range tests {
