@@ -91,7 +91,7 @@ func TestStack(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			stack := stack.NewStack[int]()
+			stack := stack.New[int]()
 			result := tt.operations(stack)
 
 			// Compare results properly for slices or other types

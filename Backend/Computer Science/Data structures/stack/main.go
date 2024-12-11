@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	stk := stack.NewStack[int]()
+	stk := stack.New[int]()
 	stk.Push(10)
 	stk.Push(9)
 	stk.Push(8)

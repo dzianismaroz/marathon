@@ -100,7 +100,7 @@ func (s *Stack[T]) PopAll() []T {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	result := make([]T, s.length)
+	result := make([]T, 0, s.length)
 
 	for s.head != nil {
 		result = append(result, s.head.value)
