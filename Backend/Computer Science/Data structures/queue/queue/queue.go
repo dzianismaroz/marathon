@@ -9,8 +9,10 @@ type (
 	}
 
 	Queue[T any] struct {
-		mu   sync.Mutex
-		last *el[T]
+		mu     sync.RWMutex
+		first  *el[T]
+		last   *el[T]
+		length uint // Queue is able to track it's own length
 	}
 )
 
@@ -18,60 +20,79 @@ func New[T any]() *Queue[T] {
 	return &Queue[T]{}
 }
 
+// Asymptomatic: O(1)
 func (q *Queue[T]) Push(val T) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 
-	if q.last == nil {
-		q.last = &el[T]{val: val}
-		return
+	newEl := &el[T]{val: val}
+
+	if q.last != nil {
+		q.last.next = newEl
+	} else {
+		// If the queue is empty, first and last point to the new element
+		q.first = newEl
 	}
 
-	q.last = &el[T]{val: val, next: q.last}
-
-	return
+	q.last = newEl
+	q.length++
 }
 
+// Asymptomatic: O(1)
 func (q *Queue[T]) Pop() (T, bool) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 
-	if q.last == nil {
+	if q.first == nil {
 		var zero T
 		return zero, false
 	}
 
-	val := q.last.val
-	q.last = q.last.next
+	val := q.first.val
+
+	q.first = q.first.next
+	if q.first == nil {
+		// If the queue is now empty, reset the last pointer
+		q.last = nil
+	}
+
+	q.length--
 
 	return val, true
 }
 
+// Asymptomatic: O(1)
 func (q *Queue[T]) Peek() (T, bool) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 
-	if q.last == nil {
+	if q.first == nil {
 		var zero T
 		return zero, false
 	}
 
-	return q.last.val, true
+	return q.first.val, true
 }
 
-func (q *Queue[T]) Len() int {
+// Asymptomatic: O(1)
+func (q *Queue[T]) Size() uint {
+	q.mu.RLock()
+	defer q.mu.RUnlock()
+
+	return q.length
+}
+
+func (q *Queue[T]) IsEmpty() bool {
+	return q.Size() == 0
+}
+
+// Clear is method to truncate all elements in Queue.
+// Asymptomatic: O(1)
+func (q *Queue[T]) Clear() {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 
-	var (
-		count int
-		p     = q.last
-	)
-
-	for p != nil {
-		count += 1
-		p = p.next
-	}
-
-	return count
+	q.first = nil
+	q.last = nil
+	q.length = 0
 }

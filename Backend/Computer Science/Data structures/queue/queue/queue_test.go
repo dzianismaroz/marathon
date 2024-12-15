@@ -29,7 +29,7 @@ func TestQueue(t *testing.T) {
 				q.Push(3)
 
 				val, ok := q.Pop()
-				if !ok || val != 3 {
+				if !ok || val != 1 {
 					t.Errorf("expected 3, got %v", val)
 				}
 
@@ -39,7 +39,7 @@ func TestQueue(t *testing.T) {
 				}
 
 				val, ok = q.Pop()
-				if !ok || val != 1 {
+				if !ok || val != 3 {
 					t.Errorf("expected 1, got %v", val)
 				}
 			},
@@ -72,7 +72,7 @@ func TestQueue(t *testing.T) {
 				q.Push(2.2)
 
 				val, ok := q.Peek()
-				if !ok || val != 2.2 {
+				if !ok || val != 1.1 {
 					t.Errorf("expected 2.2, got %v", val)
 				}
 
@@ -91,7 +91,7 @@ func TestQueue(t *testing.T) {
 					q.Push(v)
 				}
 
-				for i := len(values) - 1; i >= 0; i-- {
+				for i := 0; i <= len(values)-1; i++ {
 					val, ok := q.Pop()
 					if !ok || val != values[i] {
 						t.Errorf("expected %d, got %d", values[i], val)
