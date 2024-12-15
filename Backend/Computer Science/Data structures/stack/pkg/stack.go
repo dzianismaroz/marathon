@@ -1,33 +1,25 @@
 package stack
 
-import "sync"
-
-type (
-	el[T any] struct {
-		val  T
-		next *el[T]
-	}
-
-	// LIFO implementation.
-	Stack[T any] struct {
-		mu    sync.Mutex
-		first *el[T]
-	}
+import (
+	"fmt"
+	"sync"
 )
+
+// LIFO implementation.
+type Stack[T any] struct {
+	mu      sync.RWMutex
+	content []T
+}
 
 // Creates new Stack with default capacity of 10.
 func NewStack[T any]() *Stack[T] {
-	return &Stack[T]{}
+	return &Stack[T]{content: make([]T, 0, 10)}
 }
 
 func (s *Stack[T]) Push(elem T) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-
-	s.first = &el[T]{
-		val:  elem,
-		next: s.first,
-	}
+	s.content = append(s.content, elem)
 }
 
 func (s *Stack[T]) Pop() (T, bool) {
@@ -36,27 +28,40 @@ func (s *Stack[T]) Pop() (T, bool) {
 
 	var result T
 
-	if s.first == nil {
+	if len(s.content) == 0 {
 		return result, false
 	}
 
-	result = s.first.val
-	s.first = s.first.next
+	result = s.content[len(s.content)-1]
+	s.content = s.content[:len(s.content)-1]
 
 	return result, true
 }
 
-func (s *Stack[T]) Len() int {
+func (s *Stack[T]) Peek() (T, bool) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	var result T
+	if len(s.content) == 0 {
+		return result, false
+	}
+	return s.content[len(s.content)-1], true
+}
+
+func (s *Stack[T]) Size() int {
+	return len(s.content)
+}
+
+func (s *Stack[T]) IsEmpty() bool {
+	return len(s.content) == 0
+}
+
+func (s *Stack[T]) Clear() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	var (
-		count int
-		n     = s.first
-	)
-	for n != nil {
-		count += 1
-		n = n.next
-	}
+	s.content = make([]T, 0, 10)
+}
 
-	return count
+func (s *Stack[T]) String() string {
+	return fmt.Sprintf("%v", s.content)
 }
