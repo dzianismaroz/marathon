@@ -1,9 +1,11 @@
 package queue_test
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/dzianismaroz/marathon/queue/queue"
+	"github.com/stretchr/testify/require"
 )
 
 func TestQueue(t *testing.T) {
@@ -59,8 +61,8 @@ func TestQueue(t *testing.T) {
 					t.Error("peek from empty queue should return zero value and false")
 				}
 
-				if q.Len() != 0 {
-					t.Error("empty queue should have length 0")
+				if q.Size() != 0 {
+					t.Error("empty queue should have Sizegth 0")
 				}
 			},
 		},
@@ -76,8 +78,8 @@ func TestQueue(t *testing.T) {
 					t.Errorf("expected 2.2, got %v", val)
 				}
 
-				if q.Len() != 2 {
-					t.Errorf("expected length 2, got %d", q.Len())
+				if q.Size() != 2 {
+					t.Errorf("expected Sizegth 2, got %d", q.Size())
 				}
 			},
 		},
@@ -96,6 +98,22 @@ func TestQueue(t *testing.T) {
 					if !ok || val != values[i] {
 						t.Errorf("expected %d, got %d", values[i], val)
 					}
+				}
+			},
+		},
+		{
+			name: "Push and popAll elements",
+			scenario: func(t *testing.T) {
+				q := queue.New[int]()
+				q.Push(10)
+				q.Push(20)
+				q.Push(30)
+				q.Push(40)
+				got := q.PopAll()
+				expected := []int{10, 20, 30, 40}
+				require.Empty(t, q.Size())
+				if !reflect.DeepEqual(got, expected) {
+					t.Errorf("expected %d, got %d", expected, got)
 				}
 			},
 		},

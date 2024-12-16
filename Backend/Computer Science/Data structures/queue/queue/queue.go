@@ -1,85 +1,74 @@
 package queue
 
-import "sync"
-
-type (
-	el[T any] struct {
-		val  T
-		next *el[T]
-	}
-
-	Queue[T any] struct {
-		mu     sync.RWMutex
-		first  *el[T]
-		last   *el[T]
-		length uint // Queue is able to track it's own length
-	}
+import (
+	"sync"
 )
 
-func New[T any]() *Queue[T] {
-	return &Queue[T]{}
+type Queue[T any] struct {
+	mu      sync.RWMutex
+	content []T
 }
 
-// Asymptomatic: O(1)
+// Creates new Queue with default capacity of 10.
+func New[T any]() *Queue[T] {
+	return &Queue[T]{content: make([]T, 0, 10)}
+}
+
+// Asymptotic: O(1)
 func (q *Queue[T]) Push(val T) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
-
-	newEl := &el[T]{val: val}
-
-	if q.last != nil {
-		q.last.next = newEl
-	} else {
-		// If the queue is empty, first and last point to the new element
-		q.first = newEl
-	}
-
-	q.last = newEl
-	q.length++
+	q.content = append(q.content, val)
 }
 
-// Asymptomatic: O(1)
+// Asymptotic: O(1)
 func (q *Queue[T]) Pop() (T, bool) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
-
-	if q.first == nil {
+	switch {
+	case len(q.content) == 0:
 		var zero T
 		return zero, false
+	case len(q.content) == 1:
+		result := q.content[0]
+		q.content = make([]T, 0, 10)
+		return result, true
+	default:
+		result := q.content[0]
+		q.content = q.content[1:]
+		return result, true
 	}
-
-	val := q.first.val
-
-	q.first = q.first.next
-	if q.first == nil {
-		// If the queue is now empty, reset the last pointer
-		q.last = nil
-	}
-
-	q.length--
-
-	return val, true
 }
 
-// Asymptomatic: O(1)
+// Asymptotic: O(1)
 func (q *Queue[T]) Peek() (T, bool) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 
-	if q.first == nil {
+	if len(q.content) == 0 {
 		var zero T
 		return zero, false
 	}
 
-	return q.first.val, true
+	return q.content[0], true
 }
 
-// Asymptomatic: O(1)
+// Asymptotic: O(1)
 func (q *Queue[T]) Size() uint {
 	q.mu.RLock()
 	defer q.mu.RUnlock()
 
-	return q.length
+	return uint(len(q.content))
+}
+
+func (q *Queue[T]) PopAll() []T {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+
+	result := make([]T, len(q.content))
+	copy(result, q.content)
+	q.content = make([]T, 0, 10)
+	return result
 }
 
 func (q *Queue[T]) IsEmpty() bool {
@@ -87,12 +76,9 @@ func (q *Queue[T]) IsEmpty() bool {
 }
 
 // Clear is method to truncate all elements in Queue.
-// Asymptomatic: O(1)
+// Asymptotic: O(1)
 func (q *Queue[T]) Clear() {
 	q.mu.Lock()
 	defer q.mu.Unlock()
-
-	q.first = nil
-	q.last = nil
-	q.length = 0
+	q.content = make([]T, 0, 10)
 }

@@ -12,19 +12,8 @@ type Stack[T any] struct {
 }
 
 // Creates new Stack with default capacity of 10.
-func NewStack[T any]() *Stack[T] {
+func New[T any]() *Stack[T] {
 	return &Stack[T]{content: make([]T, 0, 10)}
-}
-
-// Single provides a singleton Stack instance.
-func Single[T any]() *Stack[T] {
-	return typedPool[T]().Get().(*Stack[T])
-}
-
-// Release resets and returns the stack instance back to the pool.
-func (s *Stack[T]) Release() {
-	s.Clear() // Reset the stack before putting it back.
-	typedPool[T]().Put(s)
 }
 
 // Push: Adding an element to the top of the stack.
@@ -32,7 +21,7 @@ func (s *Stack[T]) Release() {
 func (s *Stack[T]) Push(val T) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.content = append(s.content, elem)
+	s.content = append(s.content, val)
 }
 
 func (s *Stack[T]) Pop() (T, bool) {
@@ -61,12 +50,24 @@ func (s *Stack[T]) Peek() (T, bool) {
 	return s.content[len(s.content)-1], true
 }
 
-func (s *Stack[T]) Size() int {
-	return len(s.content)
+func (s *Stack[T]) Size() uint {
+	return uint(len(s.content))
 }
 
 func (s *Stack[T]) IsEmpty() bool {
 	return len(s.content) == 0
+}
+
+func (s *Stack[T]) PopAll() []T {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	result := make([]T, len(s.content))
+	length := len(s.content) - 1
+	for i, v := range s.content {
+		result[length-i] = v
+	}
+	s.content = make([]T, 0, 10)
+	return result
 }
 
 func (s *Stack[T]) Clear() {
