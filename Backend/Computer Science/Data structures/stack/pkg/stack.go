@@ -1,47 +1,19 @@
 package stack
 
-import "sync"
-
-type (
-
-	// element is wrapper to hold stored value and link to next element.
-	element[T any] struct {
-		value T
-		next  *element[T]
-	}
-
-	// LIFO implementation.
-	Stack[T any] struct {
-		mu     sync.RWMutex
-		head   *element[T] // head of Stask to hold the latest element.
-		length uint        // optimal way for Stack to track its length.
-	}
+import (
+	"fmt"
+	"sync"
 )
 
-var genericPools = sync.Map{} // Map to store pools by type.
-
-// typedPool provides a type-safe wrapper for sync.Pool to manage generic Stack instances.
-func typedPool[T any]() *sync.Pool {
-	pool, _ := genericPools.LoadOrStore(new(T), &sync.Pool{
-		New: func() any { return New[T]() },
-	})
-	return pool.(*sync.Pool)
+// LIFO implementation.
+type Stack[T any] struct {
+	mu      sync.RWMutex
+	content []T
 }
 
-// Creates new Stack instance.
+// Creates new Stack with default capacity of 10.
 func New[T any]() *Stack[T] {
-	return &Stack[T]{}
-}
-
-// Single provides a singleton Stack instance.
-func Single[T any]() *Stack[T] {
-	return typedPool[T]().Get().(*Stack[T])
-}
-
-// Release resets and returns the stack instance back to the pool.
-func (s *Stack[T]) Release() {
-	s.Clear() // Reset the stack before putting it back.
-	typedPool[T]().Put(s)
+	return &Stack[T]{content: make([]T, 0, 10)}
 }
 
 // Push: Adding an element to the top of the stack.
@@ -49,86 +21,61 @@ func (s *Stack[T]) Release() {
 func (s *Stack[T]) Push(val T) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-
-	s.head = &element[T]{value: val, next: s.head}
-	s.length++
+	s.content = append(s.content, val)
 }
 
-// Pop: Removing an element from the top of the stack.
-// Asymptotic : O(1).
 func (s *Stack[T]) Pop() (T, bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	var result T
 
-	if s.head == nil {
+	if len(s.content) == 0 {
 		return result, false
 	}
 
-	result, s.head = s.head.value, s.head.next
-	s.length--
+	result = s.content[len(s.content)-1]
+	s.content = s.content[:len(s.content)-1]
 
 	return result, true
 }
 
-// Peek Looking at the top element of the stack without removing it.
-// Asymptotic : O(1).
 func (s *Stack[T]) Peek() (T, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-
 	var result T
-
-	if s.head == nil {
+	if len(s.content) == 0 {
 		return result, false
 	}
-
-	return s.head.value, true
+	return s.content[len(s.content)-1], true
 }
 
-// Size: Getting the number of elements in the stack.
-// Asymptotic: O(1).
 func (s *Stack[T]) Size() uint {
-	return s.length
+	return uint(len(s.content))
 }
 
-// Size: resolves stack emptiness.
-// Asymptotic: O(1).
 func (s *Stack[T]) IsEmpty() bool {
-	return s.length == 0
+	return len(s.content) == 0
 }
 
-// Clear is method to truncate all elements in Stack.
-// Asymptotic: O(1)
+func (s *Stack[T]) PopAll() []T {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	result := make([]T, len(s.content))
+	length := len(s.content) - 1
+	for i, v := range s.content {
+		result[length-i] = v
+	}
+	s.content = make([]T, 0, 10)
+	return result
+}
+
 func (s *Stack[T]) Clear() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-
-	s.head = nil
-	s.length = 0
+	s.content = make([]T, 0, 10)
 }
 
-// PopAll pops all elements and returns as slice.
-// Asymptotic: O(n).
-func (s *Stack[T]) PopAll() []T {
-
-	idx := 0
-
-	s.mu.Lock() // --- critical section starts here ---.
-
-	result := make([]T, s.length)
-	head := s.head
-
-	for head != nil {
-		result[idx] = head.value
-		head = head.next
-		idx++
-	}
-
-	s.length = 0
-
-	s.mu.Unlock() // -- critical section release ---.
-
-	return result
+func (s *Stack[T]) String() string {
+	return fmt.Sprintf("%v", s.content)
 }

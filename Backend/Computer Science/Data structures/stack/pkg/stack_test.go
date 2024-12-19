@@ -1,6 +1,7 @@
 package stack_test
 
 import (
+	"math/rand"
 	"reflect"
 	"testing"
 
@@ -165,5 +166,83 @@ func TestStack(t *testing.T) {
 				t.Errorf("expected %v, got %v", tt.expectedResult, result)
 			}
 		})
+	}
+}
+
+func BenchmarkPop(b *testing.B) {
+	s := stack.New[int]()
+	for i := 0; i < 100_000; i++ {
+		s.Push(i)
+	}
+
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		v, _ := s.Pop()
+		if v < 0 {
+			b.Fail()
+		}
+	}
+}
+
+func BenchmarkStack_Push(b *testing.B) {
+	stack := stack.New[int]()
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		stack.Push(i)
+	}
+}
+
+func BenchmarkStack_Pop(b *testing.B) {
+	stack := stack.New[int]()
+	// Pre-fill the stack with N elements
+	for i := 0; i < b.N; i++ {
+		stack.Push(i)
+	}
+
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		stack.Pop()
+	}
+}
+
+func BenchmarkStack_PopAll(b *testing.B) {
+	stack := stack.New[int]()
+	// Pre-fill the stack with N elements
+	for i := 0; i < b.N; i++ {
+		stack.Push(i)
+	}
+
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		stack.PopAll()
+	}
+}
+
+func BenchmarkStack_Peek(b *testing.B) {
+	stack := stack.New[int]()
+	// Pre-fill the stack with one element
+	stack.Push(rand.Int())
+
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		stack.Peek()
+	}
+}
+
+func BenchmarkStack_IsEmpty(b *testing.B) {
+	stack := stack.New[int]()
+
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		empty := stack.IsEmpty()
+		if !empty {
+			b.Fail()
+		}
 	}
 }

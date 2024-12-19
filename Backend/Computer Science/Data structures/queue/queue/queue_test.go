@@ -1,6 +1,7 @@
 package queue_test
 
 import (
+	"math/rand"
 	"testing"
 
 	"github.com/dzianismaroz/marathon/queue/queue"
@@ -59,7 +60,7 @@ func TestQueue(t *testing.T) {
 					t.Error("peek from empty queue should return zero value and false")
 				}
 
-				if q.Len() != 0 {
+				if !q.IsEmpty() {
 					t.Error("empty queue should have length 0")
 				}
 			},
@@ -76,8 +77,8 @@ func TestQueue(t *testing.T) {
 					t.Errorf("expected 2.2, got %v", val)
 				}
 
-				if q.Len() != 2 {
-					t.Errorf("expected length 2, got %d", q.Len())
+				if q.Size() != 2 {
+					t.Errorf("expected length 2, got %d", q.Size())
 				}
 			},
 		},
@@ -103,5 +104,81 @@ func TestQueue(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, tt.scenario)
+	}
+}
+
+func BenchmarkQueue_Push(b *testing.B) {
+	q := queue.New[int]()
+	for i := 0; i < b.N; i++ {
+		q.Push(i)
+	}
+}
+
+func BenchmarkQueue_Pop(b *testing.B) {
+	q := queue.New[int]()
+	// Pre-fill the stack with N elements
+	for i := 0; i < b.N; i++ {
+		q.Push(i)
+	}
+
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		q.Pop()
+	}
+}
+
+func BenchmarkQueue_Peek(b *testing.B) {
+	q := queue.New[int]()
+
+	q.Push(rand.Int())
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		_, _ = q.Peek()
+	}
+}
+
+func BenchmarkQueue_Size(b *testing.B) {
+	q := queue.New[int]()
+	for i := 0; i < b.N; i++ {
+		q.Push(i)
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = q.Size()
+	}
+}
+
+func BenchmarkQueue_PopAll(b *testing.B) {
+	q := queue.New[int]()
+	for i := 0; i < b.N; i++ {
+		q.Push(i)
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = q.PopAll()
+	}
+}
+
+func BenchmarkQueue_IsEmpty(b *testing.B) {
+	q := queue.New[int]()
+	for i := 0; i < b.N; i++ {
+		q.Push(i)
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = q.IsEmpty()
+	}
+}
+
+func BenchmarkQueue_Clear(b *testing.B) {
+	q := queue.New[int]()
+	for i := 0; i < b.N; i++ {
+		q.Push(i)
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		q.Clear()
 	}
 }
