@@ -12,17 +12,17 @@ func main() {
 	q.Push(2)
 	q.Push(3)
 
-	fmt.Println("length:", q.Len())
+	fmt.Println("Size:", q.Size())
 	fmt.Println(q.Pop())
 	fmt.Println(q.Pop())
 
-	fmt.Println("length:", q.Len())
+	fmt.Println("Size:", q.Size())
 	fmt.Println(q.Peek())
 
-	fmt.Println("length:", q.Len())
+	fmt.Println("Size:", q.Size())
 	fmt.Println(q.Pop())
 
-	fmt.Println("length:", q.Len())
+	fmt.Println("Size:", q.Size())
 
 	fmt.Println(q.Pop())
 	fmt.Println(q.Pop())

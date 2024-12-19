@@ -2,9 +2,11 @@ package queue_test
 
 import (
 	"math/rand"
+	"reflect"
 	"testing"
 
 	"github.com/dzianismaroz/marathon/queue/queue"
+	"github.com/stretchr/testify/require"
 )
 
 func TestQueue(t *testing.T) {
@@ -97,6 +99,22 @@ func TestQueue(t *testing.T) {
 					if !ok || val != values[i] {
 						t.Errorf("expected %d, got %d", values[i], val)
 					}
+				}
+			},
+		},
+		{
+			name: "Push and popAll elements",
+			scenario: func(t *testing.T) {
+				q := queue.New[int]()
+				q.Push(10)
+				q.Push(20)
+				q.Push(30)
+				q.Push(40)
+				got := q.PopAll()
+				expected := []int{10, 20, 30, 40}
+				require.Empty(t, q.Size())
+				if !reflect.DeepEqual(got, expected) {
+					t.Errorf("expected %d, got %d", expected, got)
 				}
 			},
 		},
