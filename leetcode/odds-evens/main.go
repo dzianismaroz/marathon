@@ -14,10 +14,13 @@ var (
 		for i := 1; i <= limit; i += 2 {
 			<-oddsCh
 			fmt.Println("print odd", i)
+
 			if i == limit {
 				close(evensCh)
+
 				return
 			}
+
 			evensCh <- struct{}{}
 		}
 	}
@@ -27,10 +30,13 @@ var (
 		for i := 2; i <= limit; i += 2 {
 			<-evensCh
 			fmt.Println("print even", i)
+
 			if i == limit {
 				close(oddsCh)
+
 				return
 			}
+
 			oddsCh <- struct{}{}
 		}
 	}
@@ -41,6 +47,7 @@ func main() {
 	evensCh := make(chan struct{})
 
 	wg := &sync.WaitGroup{}
+	//nolint:mnd
 	wg.Add(2)
 
 	go oddsPrinter(wg, oddsCh, evensCh)

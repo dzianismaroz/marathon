@@ -187,6 +187,7 @@ func BenchmarkPop(b *testing.B) {
 
 func BenchmarkStack_Push(b *testing.B) {
 	stack := stack.New[int]()
+
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {

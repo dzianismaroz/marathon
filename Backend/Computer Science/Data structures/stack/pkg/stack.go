@@ -5,6 +5,8 @@ import (
 	"sync"
 )
 
+const intialCap = 10
+
 // LIFO implementation.
 type Stack[T any] struct {
 	mu      sync.RWMutex
@@ -13,7 +15,7 @@ type Stack[T any] struct {
 
 // Creates new Stack with default capacity of 10.
 func New[T any]() *Stack[T] {
-	return &Stack[T]{content: make([]T, 0, 10)}
+	return &Stack[T]{content: make([]T, 0, intialCap)}
 }
 
 // Push: Adding an element to the top of the stack.
@@ -43,10 +45,13 @@ func (s *Stack[T]) Pop() (T, bool) {
 func (s *Stack[T]) Peek() (T, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	var result T
+
 	if len(s.content) == 0 {
+		var result T
+
 		return result, false
 	}
+
 	return s.content[len(s.content)-1], true
 }
 
@@ -63,19 +68,26 @@ func (s *Stack[T]) PopAll() []T {
 	defer s.mu.Unlock()
 	result := make([]T, len(s.content))
 	length := len(s.content) - 1
+
 	for i, v := range s.content {
 		result[length-i] = v
 	}
-	s.content = make([]T, 0, 10)
+
+	s.content = newSlice[T]()
+
 	return result
 }
 
 func (s *Stack[T]) Clear() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.content = make([]T, 0, 10)
+	s.content = newSlice[T]()
 }
 
 func (s *Stack[T]) String() string {
 	return fmt.Sprintf("%v", s.content)
+}
+
+func newSlice[T any]() []T {
+	return make([]T, intialCap)
 }
